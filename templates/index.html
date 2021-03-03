@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block chat %}
+{% if username is not none %}
+
+        <div class="container">
+            <textarea id="chat_output" cols="80" rows="20", readonly="true"></textarea>
+        </div>
+        <div class="container">
+            <ul id="messages"></ul>
+            <div class="row">
+                <div class="col-7">
+                    <form id="form_send_msg" autocomplete="off" novalidate >
+                        <div class="form-group">
+                            <label for="message_input">Message:</label>
+                            <input type="text" class="form-control" id="message_input" placeholder="Enter your message here">
+                        </div>
+                        <button type="button" id="send_msg" class="btn btn-success">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+{% endif %}
+
+<script type="text/javascript" charset="utf-8">
+    var form = document.getElementById("form_send_msg");
+    function handleForm(event) { event.preventDefault(); } 
+    form.addEventListener('submit', handleForm);
+    
+    var socket = io();
+    
+    /*socket.on('connect', function() {
+        socket.emit('message', {data: 'I\'m connected!'});
+    });*/
+
+    socket.on('message', function(data){
+        let area = document.getElementById("chat_output");
+        if(area.value != ''){
+            area.value += "\n" + data.data;
+            area.scrollTop = area.scrollHeight;
+        }
+        else{
+            area.value += data.data;
+        }
+        
+    })
+
+    send_button = document.getElementById('send_msg');
+    send_button.onclick = function() {
+        
+        message = document.getElementById('message_input').value;
+        if(message != ''){
+            socket.emit('message', {data: message});
+            document.getElementById('message_input').value = '';
+        }
+        
+    }
+
+    
+    
+</script>
+{% endblock %}
